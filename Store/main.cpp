@@ -1,4 +1,4 @@
-#include <iostream>
+ #include <iostream>
 #include <vector>
 #include <iomanip>
 #include "product.h"
@@ -10,6 +10,19 @@ void showProducts(const std::vector<Product>& products) {
             << std::fixed << std::setprecision(2) << products[i].price << " EUR"
             << "   quantity: " << products[i].quantity << "\n";
     }
+}
+void removeProduct(std::vector<Product>& products) {
+    showProducts(products);
+
+    int num;
+    std::cout << "Enter product number to remove: ";
+    std::cin >> num;
+    if (num < 1 || num >(int)products.size()) {
+        std::cout << "No product with that number.\n";
+        return;
+    }
+    products.erase(products.begin() + (num - 1));
+    std::cout << "Product removed.\n";
 }
 
 int main() {
@@ -23,6 +36,7 @@ int main() {
     while (choice != 0) {
         std::cout << "\n=== Store ===\n";
         std::cout << "1. Show products\n";
+        std::cout << "2. Remove product\n";
         std::cout << "0. Exit\n";
         std::cout << "Choice: ";
         std::cin >> choice;
@@ -30,6 +44,9 @@ int main() {
         switch (choice) {
         case 1:
             showProducts(products);
+            break;
+        case 2:
+            removeProduct(products);
             break;
         case 0:
             std::cout << "Bye!\n";
