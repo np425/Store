@@ -15,36 +15,75 @@ void showProducts(const std::vector<Product>& products) {
   
 }
 
-void chooseProduct(const std::vector<Product>& products) {
+struct Purchase {
+    string productName;
+    int quantity;
+    double totalPrice;
+};
+void purchaseHistory(const vector<Purchase>& history) {
 
+    cout << "\n========== PURCHASE HISTORY ==========\n";
+    if (history.empty()) {
+        cout << "History is empty.\n";
+        return;
+    }
+    double grandTotal = 0;
+    for (size_t i = 0; i < history.size(); i++) {
+        cout << "\nPurchase #" << i + 1 << "\n";
+        cout << "Product: " << history[i].productName << "\n";
+        cout << "Quantity: " << history[i].quantity << "\n";
+        cout << fixed << setprecision(2);
+        cout << "Total: " << history[i].totalPrice << " EUR\n";
+        grandTotal += history[i].totalPrice;
+    }
+    cout << "\n--------------------------------------\n";
+    cout << "Grand Total: " << grandTotal << " EUR\n";
+}
+
+
+void chooseProduct(vector<Product>& products,
+    vector<Purchase>& history) {
     int productChoice;
     int quantity;
-
-
-    cout << "Enter product number: " <<endl;
+    cout << "Enter product number: ";
     cin >> productChoice;
-
     if (productChoice < 1 || productChoice > products.size()) {
         cout << "Invalid product selection.\n";
         return;
     }
-
-    cout << "Enter the quantity you want to buy: ";
+    cout << "Enter quantity: ";
     cin >> quantity;
 
     if (quantity <= 0) {
-        cout << "Invalid quantity. Please enter a positive number.\n";
+        cout << "Invalid quantity.\n";
         return;
     }
-
     if (quantity > products[productChoice - 1].quantity) {
         cout << "Not enough stock available.\n";
         return;
     }
 
-    cout << "You have chosen to buy "
-        << quantity << " of "
-        << products[productChoice - 1].name << ".\n";
+    // Calculate total price
+    double totalPrice =
+        products[productChoice - 1].price * quantity;
+
+    // Reduce stock
+    products[productChoice - 1].quantity -= quantity;
+
+    // Save purchase in history
+    history.push_back({
+        products[productChoice - 1].name,
+        quantity,
+        totalPrice
+        });
+
+    cout << "\nPurchase successful!\n";
+
+    cout << "Product: "
+        << products[productChoice - 1].name << "\n";
+
+    cout << "Total: " << fixed << setprecision(2)
+        << totalPrice << " EUR\n";
 }
 
 void changePrice(std::vector<Product>& products) {
@@ -144,17 +183,19 @@ int main() {
         { "Bread", 0.95, 15 },
         { "Cheese", 4.50, 8 }
     };
-
+    vector<Purchase> history;
     int choice = -1;
 
     while (choice != 0) {
         std::cout << "\n=== Store ===\n";
         std::cout << "1. Show products\n";
-        std::cout << "2. Show sum of all purchase totals \n";
-        std::cout << "3. Cheapest product\n";
+        std::cout << "2. Purchase products\n";
+        cout << "3. Purchase history\n";
         std::cout << "4. Change price\n";
         std::cout << "5. Check stock of a product\n";
         std::cout << "6. Buy a product\n";
+        std::cout << "7. Show sum of all purchase totals \n";
+        std::cout << "8. Cheapest product\n";
         std::cout << "0. Exit\n";
         std::cout << "Choice: ";
 
@@ -167,7 +208,13 @@ int main() {
         switch (choice) {
         case 1:
             showProducts(products);
-            chooseProduct(products);
+            break;
+        case 2:
+            showProducts(products);
+            chooseProduct(products, history);
+            break;
+        case 3:
+            purchaseHistory(history);
             break;
         case 2:
             changePrice(products);
