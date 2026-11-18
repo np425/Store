@@ -2,7 +2,9 @@
 #include <vector>
 #include <iomanip>
 #include "product.h"
+#include <limits>
 using namespace std;    
+
 void showProducts(const std::vector<Product>& products) {
     for (size_t i = 0; i < products.size(); i++) {
         std::cout << i + 1 << ". "
@@ -61,13 +63,23 @@ int main() {
     };
 
     int choice = -1;
+
     while (choice != 0) {
         std::cout << "\n=== Store ===\n";
         std::cout << "1. Show products\n";
-        std::cout << "2. Show sum of all purchase totals \n";
+        std::cout << "2. Show sum of all purchase totals\n";
         std::cout << "0. Exit\n";
         std::cout << "Choice: ";
-        std::cin >> choice;
+
+        if (!(std::cin >> choice)) {
+            std::cout << "Enter a number.\n";
+
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+            choice = -1;
+            continue;
+        }
 
         switch (choice) {
         case 1:
