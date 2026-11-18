@@ -3,7 +3,9 @@
 #include <vector>
 #include <iomanip>
 #include "product.h"
-using namespace std;    
+#include <limits>
+using namespace std;
+
 void showProducts(const std::vector<Product>& products) {
     for (size_t i = 0; i < products.size(); i++) {
         std::cout << i + 1 << ". "
@@ -12,17 +14,38 @@ void showProducts(const std::vector<Product>& products) {
             << products[i].price << " EUR"
             << "   quantity: " << products[i].quantity << "\n";
     }
-  
+}
+
+bool readInt(int& value) {
+    if (std::cin >> value) {
+        return true;
+    }
+
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    return false;
+}
+
+bool readDouble(double& value) {
+    if (std::cin >> value) {
+        return true;
+    }
+
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    return false;
 }
 
 void chooseProduct(const std::vector<Product>& products) {
-
     int productChoice;
     int quantity;
 
+    cout << "Enter product number: " << endl;
 
-    cout << "Enter product number: " <<endl;
-    cin >> productChoice;
+    if (!readInt(productChoice)) {
+        cout << "Enter a number.\n";
+        return;
+    }
 
     if (productChoice < 1 || productChoice > products.size()) {
         cout << "Invalid product selection.\n";
@@ -30,7 +53,11 @@ void chooseProduct(const std::vector<Product>& products) {
     }
 
     cout << "Enter the quantity you want to buy: ";
-    cin >> quantity;
+
+    if (!readInt(quantity)) {
+        cout << "Enter a number.\n";
+        return;
+    }
 
     if (quantity <= 0) {
         cout << "Invalid quantity. Please enter a positive number.\n";
@@ -54,7 +81,11 @@ void changePrice(std::vector<Product>& products) {
     double newPrice;
 
     std::cout << "Choose product number: ";
-    std::cin >> number;
+
+    if (!readInt(number)) {
+        std::cout << "Enter a number.\n";
+        return;
+    }
 
     if (number < 1 || number > products.size()) {
         std::cout << "Invalid product number!\n";
@@ -62,7 +93,11 @@ void changePrice(std::vector<Product>& products) {
     }
 
     std::cout << "Enter new price: ";
-    std::cin >> newPrice;
+
+    if (!readDouble(newPrice)) {
+        std::cout << "Enter a number.\n";
+        return;
+    }
 
     if (newPrice < 0) {
         std::cout << "Price cannot be negative!\n";
@@ -79,61 +114,72 @@ void cheapestProduct(const std::vector<Product>& products) {
     else {
         double cheapestPrice = products[0].price;
         int cheapestNumber = 0;
+
         for (size_t i = 1; i < products.size(); i++) {
             if (products[i].price < cheapestPrice) {
                 cheapestPrice = products[i].price;
                 cheapestNumber = i;
             }
         }
+
         std::cout << "The cheapest product is " << cheapestNumber + 1 << ". "
             << std::left << std::setw(10) << products[cheapestNumber].name
-            << std::fixed << std::setprecision(2) << products[cheapestNumber].price << " EUR\n";
+            << std::fixed << std::setprecision(2)
+            << products[cheapestNumber].price << " EUR\n";
     }
-}
-
-bool readInt(int& value) {
-    if (std::cin >> value) return true;
-    std::cin.clear();
-    std::cin.ignore(10000, '\n');
-    return false;
 }
 
 void showStock(const std::vector<Product>& products) {
     showProducts(products);
+
     std::cout << "Choose product number: ";
+
     int n;
-    if (!readInt(n) || n < 1 || n >(int)products.size()) {
+
+    if (!readInt(n) || n < 1 || n > (int)products.size()) {
         std::cout << "Invalid product.\n";
         return;
     }
+
     const Product& p = products[n - 1];
+
     std::cout << p.name << ": " << p.quantity << " left in stock.\n";
 }
 
 void buyProduct(std::vector<Product>& products) {
     showProducts(products);
+
     std::cout << "Choose product number: ";
+
     int n;
-    if (!readInt(n) || n < 1 || n >(int)products.size()) {
+
+    if (!readInt(n) || n < 1 || n > (int)products.size()) {
         std::cout << "Invalid product.\n";
         return;
     }
+
     Product& p = products[n - 1];
 
     std::cout << "How many " << p.name << " do you want to buy? ";
+
     int amount;
+
     if (!readInt(amount) || amount <= 0) {
         std::cout << "Invalid amount.\n";
         return;
     }
+
     if (amount > p.quantity) {
         std::cout << "Not enough stock. Only " << p.quantity << " left.\n";
         return;
     }
+
     p.quantity -= amount;
+
     std::cout << "Bought " << amount << " x " << p.name
         << " for " << std::fixed << std::setprecision(2)
         << amount * p.price << " EUR.\n";
+
     std::cout << p.name << " left: " << p.quantity << "\n";
 }
 
@@ -159,7 +205,7 @@ int main() {
         std::cout << "Choice: ";
 
         if (!readInt(choice)) {
-            std::cout << "Please enter a number.\n";
+            std::cout << "Enter a number.\n";
             choice = -1;
             continue;
         }
@@ -169,20 +215,38 @@ int main() {
             showProducts(products);
             chooseProduct(products);
             break;
+
         case 2:
-            changePrice(products);
+            std::cout << "Sum of all purchase totals is: ";
+            {
+                double sum = 0;
+                for (size_t i = 0; i < products.size(); i++) {
+                    sum += products[i].price * products[i].quantity;
+                }
+                std::cout << std::fixed << std::setprecision(2) << sum << " EUR\n";
+            }
             break;
+
         case 3:
             cheapestProduct(products);
             break;
-          case 4:
+
+        case 4:
             changePrice(products);
             break;
+
+        case 5:
+            showStock(products);
+            break;
+
+        case 6:
+            buyProduct(products);
+            break;
+
         case 0:
             std::cout << "Bye!\n";
             break;
-        case 5: showStock(products); break;
-        case 6: buyProduct(products); break;
+
         default:
             std::cout << "Unknown option.\n";
         }
